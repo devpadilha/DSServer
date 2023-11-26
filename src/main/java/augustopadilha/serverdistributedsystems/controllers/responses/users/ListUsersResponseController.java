@@ -1,7 +1,7 @@
-package augustopadilha.serverdistributedsystems.controllers.responses;
+package augustopadilha.serverdistributedsystems.controllers.responses.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import augustopadilha.serverdistributedsystems.models.UserModel;
+import augustopadilha.serverdistributedsystems.models.User;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static augustopadilha.serverdistributedsystems.controllers.responses.ResponseController.sendResponse;
+import static augustopadilha.serverdistributedsystems.controllers.responses.common.ResponseController.sendResponse;
 
 public class ListUsersResponseController {
-    public static void send(String action, boolean error, String message, List<UserModel> userModels, Socket socket) throws IOException {
+    public static void send(String action, boolean error, String message, List<User> users, Socket socket) throws IOException {
         // Criar o JSON de resposta
         Map<String, Object> jsonMapList = new HashMap<>();
         jsonMapList.put("action", action);
@@ -23,12 +23,12 @@ public class ListUsersResponseController {
 
         if (!error) {
             List<Map<String, Object>> userList = new ArrayList<>();
-            for (UserModel userModel : userModels) {
+            for (User user : users) {
                 Map<String, Object> userMap = new HashMap<>();
-                userMap.put("id", userModels.indexOf(userModel) + 1);
-                userMap.put("name", userModel.getName());
-                userMap.put("type", userModel.getType());
-                userMap.put("email", userModel.getEmail());
+                userMap.put("id", user.getId());
+                userMap.put("name", user.getName());
+                userMap.put("type", user.getType());
+                userMap.put("email", user.getEmail());
                 userList.add(userMap);
             }
 

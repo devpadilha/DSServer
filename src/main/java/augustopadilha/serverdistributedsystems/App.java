@@ -1,13 +1,20 @@
 package augustopadilha.serverdistributedsystems;
 
-import augustopadilha.serverdistributedsystems.controllers.responses.*;
+import augustopadilha.serverdistributedsystems.controllers.responses.common.DeleteResponseController;
+import augustopadilha.serverdistributedsystems.controllers.responses.common.RegisterResponseController;
+import augustopadilha.serverdistributedsystems.controllers.responses.points.ListPointsResponseController;
+import augustopadilha.serverdistributedsystems.controllers.responses.segments.EditSegmentResponseController;
+import augustopadilha.serverdistributedsystems.controllers.responses.segments.ListSegmentsResponseSender;
+import augustopadilha.serverdistributedsystems.controllers.responses.users.*;
 import augustopadilha.serverdistributedsystems.controllers.system.DatabaseController;
 import augustopadilha.serverdistributedsystems.controllers.system.JWTController;
 import augustopadilha.serverdistributedsystems.controllers.system.SessionController;
 import augustopadilha.serverdistributedsystems.controllers.system.UserCredentialsController;
+import augustopadilha.serverdistributedsystems.models.Point;
+import augustopadilha.serverdistributedsystems.models.Segment;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import augustopadilha.serverdistributedsystems.models.UserModel;
+import augustopadilha.serverdistributedsystems.models.User;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -78,42 +85,71 @@ public class App {
                     String action = jsonNode.get("action").asText();
 
                     // Obtenha os dados do usuário do JSON recebido
-                    JsonNode userData = jsonNode.get("data");
+                    JsonNode data = jsonNode.get("data");
                     String name = null;
                     String email = null;
                     String password = null;
                     String type = null;
                     String token = null;
                     int id = -1;
-                    int user_id = -1;
+                    String direction = null;
+                    String distance = null;
+                    String obs = null;
+                    int originPointId = -1;
+                    int destinyPointId = -1;
 
-                    if(userData.get("name") != null)
-                        name = userData.get("name").asText();
+                    if(data.get("name") != null)
+                        name = data.get("name").asText();
 
-                    if(userData.get("email") != null)
-                        email = userData.get("email").asText();
+                    if(data.get("email") != null)
+                        email = data.get("email").asText();
 
-                    if(userData.get("password") != null)
-                        password = userData.get("password").asText();
+                    if(data.get("password") != null)
+                        password = data.get("password").asText();
 
-                    if(userData.get("type") != null)
-                        type = userData.get("type").asText();
+                    if(data.get("type") != null)
+                        type = data.get("type").asText();
 
-                    if(userData.get("token") != null)
-                        token = userData.get("token").asText();
+                    if(data.get("token") != null)
+                        token = data.get("token").asText();
 
-                    if(userData.get("id") != null)
-                        id = userData.get("id").asInt();
+                    if(data.get("id") != null)
+                        id = data.get("id").asInt();
 
-                    if(userData.get("user_id") != null)
-                        user_id = userData.get("user_id").asInt();
+                    if(data.get("user_id") != null)
+                        id = data.get("user_id").asInt();
+
+                    if(data.get("ponto_id") != null)
+                        id = data.get("ponto_id").asInt();
+
+                    if(data.get("segmento_id") != null)
+                        id = data.get("ponto_id").asInt();
+
+                    if(data.get("obs") != null)
+                        obs = data.get("obs").asText();
+
+                    if(data.get("direcao") != null)
+                        direction = data.get("direcao").asText();
+
+                    if(data.get("distancia") != null)
+                        distance = data.get("distance").asText();
+
+                    if(data.get("ponto_origem") != null)
+                        originPointId = data.get("ponto_origem").asInt();
+
+                    if(data.get("ponto_destino") != null)
+                        destinyPointId = data.get("ponto_destino").asInt();
 
                     boolean error = false;
                     String message = "";
 
-                    UserModel user = databaseController.getUserByEmail(email);
+                    User user = databaseController.getUserByEmail(email);
+                    Point point = databaseController.getPointById(id);
+                    Segment segment = databaseController.getSegmentById(id);
+
 
                     switch (action) {
+                        /*---------------------------------------------------------- USERS ----------------------------------------------------------*/
                         case "cadastro-usuario":
                             // Checar se existe algum usuário com o mesmo email
                             if (databaseController.userExistsWithEmail(email)) {
@@ -210,13 +246,13 @@ public class App {
                             // Valide o token JWT usando a função isValidToken de JWTManager
                             if (JWTController.isTokenAdmin(token)) {
                                 // Obter todos os usuários do banco de dados
-                                List<UserModel> userModels = databaseController.getAllUsers();
+                                List<User> users = databaseController.getAllUsers();
 
                                 error = false;
                                 message = "Sucesso";
 
                                 // Criar o JSON de resposta
-                                ListUsersResponseController.send(action, error, message, userModels, socket);
+                                ListUsersResponseController.send(action, error, message, users, socket);
                             } else {
                                 error = true;
                                 message = "Erro: O token não possui privilégios de administrador.";
@@ -249,22 +285,23 @@ public class App {
 
                         case "autoedicao-usuario":
                             if(JWTController.isValid(token)) {
-                                user = null;
-                                user = databaseController.getUserById(id);
-
-                                if(user == null) {
+                                if(databaseController.getUserByToken(token) == null) {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
+                                    User editedUser = databaseController.getUserByToken(token);
+                                    if(name != editedUser.getName()) editedUser.setName(name);
+                                    if(email != editedUser.getEmail()) editedUser.setEmail(email);
+                                    if(password != editedUser.getPassword()) editedUser.setPassword(password);
                                     error = false;
                                     message = "Usuário atualizado com sucesso!";
-                                    databaseController.editUser(name, email, password, id);
+                                    databaseController.editUser(editedUser);
                                 }
                             } else {
                                 error = true;
                                 message = "Erro: Usuário não logado";
                             }
-                            EditResponseController.send(action, error, message, null, socket);
+                            EditUserResponseController.send(action, error, message, null, socket);
 
                             // Limpe o StringBuilder para a próxima solicitação
                             jsonBuilder.setLength(0);
@@ -276,9 +313,21 @@ public class App {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
-                                    error = false;
-                                    message = "Usuário removido com sucesso!";
-                                    databaseController.deleteUser(email);
+                                    if(user.getEmail() != email) {
+                                        error = true;
+                                        message = "Erro: Email incorreto";
+                                    }
+
+                                    else if(!user.getPassword().equals(password)) {
+                                        error = true;
+                                        message = "Erro: Senha incorreta";
+                                    }
+
+                                    else {
+                                        error = false;
+                                        message = "Usuário removido com sucesso!";
+                                        databaseController.deleteUser(email);
+                                    }
                                 }
                             } else {
                                 error = true;
@@ -292,7 +341,6 @@ public class App {
 
                         case "pedido-edicao-usuario":
                             if(JWTController.isTokenAdmin(token)) {
-                                user = null;
                                 user = databaseController.getUserById(id);
                                 if(user == null) {
                                     error = true;
@@ -306,7 +354,7 @@ public class App {
                                 message = "Erro: O token não possui privilégios de administrador.";
                             }
 
-                            EditResponseController.send(action, error, message, user, socket);
+                            EditUserResponseController.send(action, error, message, user, socket);
 
                             // Limpe o StringBuilder para a próxima solicitação
                             jsonBuilder.setLength(0);
@@ -314,22 +362,20 @@ public class App {
 
                         case "edicao-usuario":
                             if(JWTController.isTokenAdmin(token)) {
-                                user = null;
-                                user = databaseController.getUserById(id);
                                 if(user == null) {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
                                     error = false;
                                     message = "Sucesso";
-                                    databaseController.editUser(name, email, password, id);
+                                    databaseController.editUser(databaseController.getUserById(id));
                                 }
                             } else {
                                 error = true;
                                 message = "Erro: O token não possui privilégios de administrador.";
                             }
 
-                            EditResponseController.send(action, error, message, null, socket);
+                            EditUserResponseController.send(action, error, message, null, socket);
 
                             // Limpe o StringBuilder para a próxima solicitação
                             jsonBuilder.setLength(0);
@@ -354,7 +400,236 @@ public class App {
                             // Limpe o StringBuilder para a próxima solicitação
                             jsonBuilder.setLength(0);
                             break;
+                        /*---------------------------------------------------------------------------------------------------------------------------*/
+                        /*---------------------------------------------------------- POINTS ----------------------------------------------------------*/
+                        case "cadastro-ponto":
+                            if(JWTController.isValid(token)) {
+                                if(databaseController.getUserByToken(token) == null) {
+                                    error = true;
+                                    message = "Erro: Usuário não encontrado";
+                                } else {
+                                    if(JWTController.isTokenAdmin(token)) {
+                                        error = true;
+                                        message = "Erro: O token não possui privilégios de administrador.";
+                                    } else {
+                                        error = false;
+                                        message = "Ponto cadastrado com sucesso!";
+                                        databaseController.registerPoint(name, obs);
+                                    }
+                                }
+                            } else {
+                                error = true;
+                                message = "Erro: Usuário não logado";
+                            }
+                            RegisterResponseController.send(action, error, message, socket);
 
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                            case "pedido-edicao-ponto":
+                                if(JWTController.isTokenAdmin(token)) {
+                                    segment = databaseController.getSegmentById(id);
+                                    if(segment == null) {
+                                        error = true;
+                                        message = "Erro: Segmento não encontrado";
+                                    } else {
+                                        if(JWTController.isTokenAdmin(token)) {
+                                            error = true;
+                                            message = "Erro: O token não possui privilégios de administrador.";
+                                        } else {
+                                            error = false;
+                                            message = "Sucesso";
+                                        }
+                                    }
+                                } else {
+                                    error = true;
+                                    message = "Erro: O token não possui privilégios de administrador.";
+                                }
+                                EditSegmentResponseController.send(action, error, message, segment, socket);
+
+                                // Limpe o StringBuilder para a próxima solicitação
+                                jsonBuilder.setLength(0);
+                                break;
+
+                        case "listar-pontos":
+                            // Valide o token JWT usando a função isValidToken de JWTManager
+                            if (JWTController.isTokenAdmin(token)) {
+                                // Obter todos os pontos do banco de dados
+                                List<Point> points = databaseController.getAllPoints();
+
+                                error = false;
+                                message = "Sucesso";
+
+                                // Criar o JSON de resposta
+                                ListPointsResponseController.send(action, error, message, points, socket);
+                            } else {
+                                error = true;
+                                message = "Erro: O token não possui privilégios de administrador.";
+
+                                // Criar o JSON de resposta
+                                ListPointsResponseController.send(action, error, message, null, socket);
+                            }
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                        case "edicao-ponto":
+                            if(JWTController.isTokenAdmin(token)) {
+                                if(user == null) {
+                                    error = true;
+                                    message = "Erro: Usuário não encontrado";
+                                } else {
+                                    error = false;
+                                    message = "Sucesso";
+                                    databaseController.editPoint(databaseController.getPointById(id));
+                                }
+                            } else {
+                                error = true;
+                                message = "Erro: O token não possui privilégios de administrador.";
+                            }
+
+                            EditUserResponseController.send(action, error, message, null, socket);
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                            case "excluir-ponto":
+                            if(JWTController.isTokenAdmin(token)) {
+                                if(user == null) {
+                                    error = true;
+                                    message = "Erro: Usuário não encontrado";
+                                } else {
+                                    error = false;
+                                    message = "Ponto removido com sucesso!";
+                                    databaseController.deletePoint(id);
+                                }
+                            } else {
+                                error = true;
+                                message = "Erro: O token não possui privilégios de administrador.";
+                            }
+                            DeleteResponseController.send(action, error, message, socket);
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+                        /*---------------------------------------------------------------------------------------------------------------------------*/
+
+                        /*-------------------------------------------------------- SEGMENTS --------------------------------------------------------*/
+                        case "cadastro-segmento":
+                            if(JWTController.isValid(token)) {
+                                if(databaseController.getUserByToken(token) == null) {
+                                    error = true;
+                                    message = "Erro: Usuário não encontrado";
+                                } else {
+                                    if(JWTController.isTokenAdmin(token)) {
+                                        error = true;
+                                        message = "Erro: O token não possui privilégios de administrador.";
+                                    } else {
+                                        error = false;
+                                        message = "Segmento cadastrado com sucesso!";
+                                        databaseController.registerSegment(direction, distance, obs, originPointId, destinyPointId);
+                                    }
+                                }
+                            } else {
+                                error = true;
+                                message = "Erro: Usuário não logado";
+                            }
+                            RegisterResponseController.send(action, error, message, socket);
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                            case "pedido-edicao-segmento":
+                                if(JWTController.isTokenAdmin(token)) {
+                                    segment = databaseController.getSegmentById(id);
+                                    if(user == null) {
+                                        error = true;
+                                        message = "Erro: Segmento não encontrado";
+                                    } else {
+                                        databaseController.getSegmentById(id);
+                                        error = false;
+                                        message = "Sucesso";
+                                    }
+                                } else {
+                                    error = true;
+                                    message = "Erro: O token não possui privilégios de administrador.";
+                                }
+
+                                EditUserResponseController.send(action, error, message, user, socket);
+
+                                // Limpe o StringBuilder para a próxima solicitação
+                                jsonBuilder.setLength(0);
+                                break;
+
+                        case "listar-segmentos":
+                            // Valide o token JWT usando a função isValidToken de JWTManager
+                            if (JWTController.isTokenAdmin(token)) {
+                                // Obter todos os usuários do banco de dados
+                                    List<Segment> segments = databaseController.getAllSegments();
+
+                                error = false;
+                                message = "Sucesso";
+
+                                // Criar o JSON de resposta
+                                ListSegmentsResponseSender.send(action, error, message, segments, socket);
+                            } else {
+                                error = true;
+                                message = "Erro: O token não possui privilégios de administrador.";
+
+                                // Criar o JSON de resposta
+                                ListSegmentsResponseSender.send(action, error, message, null, socket);
+                            }
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                        case "edicao-segmento":
+                            if(JWTController.isTokenAdmin(token)) {
+                                if(user == null) {
+                                    error = true;
+                                    message = "Erro: Usuário não encontrado";
+                                } else {
+                                    error = false;
+                                    message = "Sucesso";
+                                    databaseController.editSegment(direction, distance, obs, originPointId, destinyPointId);
+                                }
+                            } else {
+                                error = true;
+                                message = "Erro: O token não possui privilégios de administrador.";
+                            }
+
+                            EditUserResponseController.send(action, error, message, null, socket);
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                        case "excluir-segmento":
+                            if(JWTController.isTokenAdmin(token)) {
+                                if(user == null) {
+                                    error = true;
+                                    message = "Erro: Usuário não encontrado";
+                                } else {
+                                    error = false;
+                                    message = "Segmento removido com sucesso!";
+                                    databaseController.deleteSegment(id);
+                                }
+                            } else {
+                                error = true;
+                                message = "Erro: O token não possui privilégios de administrador.";
+                            }
+                            DeleteResponseController.send(action, error, message, socket);
+
+                            // Limpe o StringBuilder para a próxima solicitação
+                            jsonBuilder.setLength(0);
+                            break;
+
+                        /*---------------------------------------------------------------------------------------------------------------------------*/
                         default:
                             System.out.println("Opção inválida");
                             break;
@@ -363,6 +638,8 @@ public class App {
             }
         } catch (java.io.IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally { socket.close(); }
     }
 }

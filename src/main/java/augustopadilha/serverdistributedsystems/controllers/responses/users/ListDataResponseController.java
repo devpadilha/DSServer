@@ -1,4 +1,4 @@
-package augustopadilha.serverdistributedsystems.controllers.responses;
+package augustopadilha.serverdistributedsystems.controllers.responses.users;
 
 import augustopadilha.serverdistributedsystems.controllers.system.DatabaseController;
 import augustopadilha.serverdistributedsystems.controllers.system.SessionController;
@@ -10,14 +10,14 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import augustopadilha.serverdistributedsystems.models.UserModel;
-import static augustopadilha.serverdistributedsystems.controllers.responses.ResponseController.sendResponse;
+import augustopadilha.serverdistributedsystems.models.User;
+import static augustopadilha.serverdistributedsystems.controllers.responses.common.ResponseController.sendResponse;
 
 public class ListDataResponseController {
     public static void send(String action, boolean error, String message, String token, Socket socket) throws IOException {
 
         // Obter usuário da sessão
-        UserModel user = SessionController.getSessionUser(token);
+        User user = SessionController.getSessionUser(token);
 
         // Criar o JSON de resposta
         Map<String, Object> jsonMapData = new HashMap<>();
@@ -28,11 +28,12 @@ public class ListDataResponseController {
         if (!error) {
             DatabaseController databaseController = new DatabaseController();
             Map<String, Object> dataMap = new HashMap<>();
-            dataMap.put("id", databaseController.getIdByEmail(user.getEmail()));
-            dataMap.put("name", user.getName());
-            dataMap.put("type", user.getType());
-            dataMap.put("email", user.getEmail());
-
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", databaseController.getIdByEmail(user.getEmail()));
+            userMap.put("name", user.getName());
+            userMap.put("type", user.getType());
+            userMap.put("email", user.getEmail());
+            dataMap.put("user", userMap);
             jsonMapData.put("data", dataMap);
         } else jsonMapData.put("data", null);
 

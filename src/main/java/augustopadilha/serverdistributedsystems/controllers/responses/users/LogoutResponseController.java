@@ -1,4 +1,4 @@
-package augustopadilha.serverdistributedsystems.controllers.responses;
+package augustopadilha.serverdistributedsystems.controllers.responses.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import static augustopadilha.serverdistributedsystems.controllers.responses.ResponseController.sendResponse;
+import static augustopadilha.serverdistributedsystems.controllers.responses.common.ResponseController.sendResponse;
 
 public class LogoutResponseController {
     public static void send(String action, boolean error, String message, Socket socket) throws IOException {

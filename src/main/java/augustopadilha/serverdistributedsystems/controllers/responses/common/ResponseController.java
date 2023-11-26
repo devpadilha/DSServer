@@ -1,4 +1,4 @@
-package augustopadilha.serverdistributedsystems.controllers.responses;
+package augustopadilha.serverdistributedsystems.controllers.responses.common;
 
 import java.io.PrintWriter;
 
