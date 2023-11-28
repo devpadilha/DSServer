@@ -7,7 +7,7 @@ public class Point {
 
     public Point(String name, String obs, int id) {
         this.name = name;
-        this.name = obs;
+        this.obs = obs;
         this.id = id;
     }
     public String getName() {

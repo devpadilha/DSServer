@@ -53,7 +53,6 @@ public class DatabaseController {
             preparedStatement.setString(3, password);
             preparedStatement.setString(4, type);
 
-            int rowsInserted = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -222,11 +221,6 @@ public class DatabaseController {
     }
 
     public void registerPoint(String name, String obs) {
-        // Verifique se um ponto com o mesmo nome já existe no banco de dados.
-        if (getPointById(Integer.parseInt(name)) != null) {
-            return;
-        }
-
         String insertPointQuery = "INSERT INTO points (name, obs) VALUES (?, ?)";
 
         try {
@@ -252,9 +246,9 @@ public class DatabaseController {
 
             // Processar os resultados e criar objetos de usuário
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
                 String name = resultSet.getString("name");
                 String obs = resultSet.getString("obs");
+                int id = resultSet.getInt("id");
 
                 Point point = new Point(name, obs, id);
                 points.add(point);
@@ -322,8 +316,6 @@ public class DatabaseController {
             preparedStatement.setString(3, obs);
             preparedStatement.setInt(4, originPointId);
             preparedStatement.setInt(5, destinyPointId);
-
-            int rowsInserted = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

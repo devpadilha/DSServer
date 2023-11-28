@@ -122,8 +122,11 @@ public class App {
                     if(data.get("ponto_id") != null)
                         id = data.get("ponto_id").asInt();
 
-                    if(data.get("segmento_id") != null)
-                        id = data.get("ponto_id").asInt();
+                    Segment segment = null;
+                    if(data.get("segmento") != null) {
+                        JsonNode segmentNode = data.get("segmento");
+                        segment = Segment.fromJsonString(segmentNode.toString());
+                    }
 
                     if(data.get("obs") != null)
                         obs = data.get("obs").asText();
@@ -145,7 +148,6 @@ public class App {
 
                     User user = databaseController.getUserByEmail(email);
                     Point point = databaseController.getPointById(id);
-                    Segment segment = databaseController.getSegmentById(id);
 
 
                     switch (action) {
@@ -408,7 +410,7 @@ public class App {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
-                                    if(JWTController.isTokenAdmin(token)) {
+                                    if(!JWTController.isTokenAdmin(token)) {
                                         error = true;
                                         message = "Erro: O token não possui privilégios de administrador.";
                                     } else {
@@ -457,7 +459,6 @@ public class App {
                             if (JWTController.isTokenAdmin(token)) {
                                 // Obter todos os pontos do banco de dados
                                 List<Point> points = databaseController.getAllPoints();
-
                                 error = false;
                                 message = "Sucesso";
 
@@ -477,12 +478,12 @@ public class App {
 
                         case "edicao-ponto":
                             if(JWTController.isTokenAdmin(token)) {
-                                if(user == null) {
+                                if(databaseController.getUserById(JWTController.getId(token)) == null) {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
                                     error = false;
-                                    message = "Sucesso";
+                                    message = "Ponto editado com sucesso!";
                                     databaseController.editPoint(databaseController.getPointById(id));
                                 }
                             } else {
@@ -497,8 +498,8 @@ public class App {
                             break;
 
                             case "excluir-ponto":
-                            if(JWTController.isTokenAdmin(token)) {
-                                if(user == null) {
+                            if(JWTController.isTokenAdmin(token)) {;
+                                if(databaseController.getUserById(JWTController.getId(token)) == null) {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
@@ -524,13 +525,13 @@ public class App {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
-                                    if(JWTController.isTokenAdmin(token)) {
+                                    if(!JWTController.isTokenAdmin(token)) {
                                         error = true;
                                         message = "Erro: O token não possui privilégios de administrador.";
                                     } else {
                                         error = false;
                                         message = "Segmento cadastrado com sucesso!";
-                                        databaseController.registerSegment(direction, distance, obs, originPointId, destinyPointId);
+                                        databaseController.registerSegment(segment.getDirection(), segment.getDistance(), segment.getObs(), segment.getOriginPoint(), segment.getDestinyPoint());
                                     }
                                 }
                             } else {
@@ -546,20 +547,23 @@ public class App {
                             case "pedido-edicao-segmento":
                                 if(JWTController.isTokenAdmin(token)) {
                                     segment = databaseController.getSegmentById(id);
-                                    if(user == null) {
+                                    if(databaseController.getUserById(JWTController.getId(token)) == null) {
                                         error = true;
-                                        message = "Erro: Segmento não encontrado";
+                                        message = "Erro: Usuário não encontrado";
                                     } else {
-                                        databaseController.getSegmentById(id);
-                                        error = false;
-                                        message = "Sucesso";
+                                        if (segment == null) {
+                                            error = true;
+                                            message = "Erro: Segmento não encontrado";
+                                        } else {
+                                            message = "Sucesso";
+                                        }
                                     }
                                 } else {
                                     error = true;
                                     message = "Erro: O token não possui privilégios de administrador.";
                                 }
 
-                                EditUserResponseController.send(action, error, message, user, socket);
+                                EditSegmentResponseController.send(action, error, message, segment, socket);
 
                                 // Limpe o StringBuilder para a próxima solicitação
                                 jsonBuilder.setLength(0);
@@ -590,7 +594,7 @@ public class App {
 
                         case "edicao-segmento":
                             if(JWTController.isTokenAdmin(token)) {
-                                if(user == null) {
+                                if(databaseController.getUserById(JWTController.getId(token)) == null) {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
@@ -611,7 +615,7 @@ public class App {
 
                         case "excluir-segmento":
                             if(JWTController.isTokenAdmin(token)) {
-                                if(user == null) {
+                                if(databaseController.getUserById(JWTController.getId(token)) == null) {
                                     error = true;
                                     message = "Erro: Usuário não encontrado";
                                 } else {
