@@ -14,6 +14,15 @@ public class Segment {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    public Segment(String direction, String distance, String obs, int originPointId, int destinyPointId, int id) {
+        this.direcao = direction;
+        this.distancia = distance;
+        this.obs = obs;
+        this.ponto_origem = originPointId;
+        this.ponto_destino = destinyPointId;
+        this.id = id;
+    }
+
     public Segment(String direction, String distance, String obs, int originPointId, int destinyPointId) {
         this.direcao = direction;
         this.distancia = distance;
@@ -27,12 +36,12 @@ public class Segment {
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
         // Extrair os valores do JsonNode para criar um novo objeto Segment
-        JsonNode originNode = jsonNode.path("segmento").path("ponto_origem");
-        JsonNode destNode = jsonNode.path("segmento").path("ponto_destino");
+        JsonNode originNode = jsonNode.path("ponto_origem");
+        JsonNode destNode = jsonNode.path("ponto_destino");
 
-        String direction = jsonNode.path("segmento").path("direcao").asText();
-        String distance = jsonNode.path("segmento").path("distancia").asText();
-        String obs = jsonNode.path("segmento").path("obs").asText();
+        String direction = jsonNode.path("direcao").asText();
+        String distance = jsonNode.path("distancia").asText();
+        String obs = jsonNode.path("obs").asText();
 
         int originPointId = originNode.path("id").asInt();
         int destinyPointId = destNode.path("id").asInt();
@@ -44,6 +53,27 @@ public class Segment {
     public int getOriginPoint() {
         return this.ponto_origem;
     }
+
+    public void setDirection(String direcao) {
+        this.direcao = direcao;
+    }
+
+    public void setDistance(String distancia) {
+        this.distancia = distancia;
+    }
+
+    public void setObs(String obs) {
+        this.obs = obs;
+    }
+
+    public void setOriginPoint(int ponto_origem) {
+        this.ponto_origem = ponto_origem;
+    }
+
+    public void setDestinyPoint(int ponto_destino) {
+        this.ponto_destino = ponto_destino;
+    }
+
     public int getDestinyPoint() {
         return this.ponto_destino;
     }

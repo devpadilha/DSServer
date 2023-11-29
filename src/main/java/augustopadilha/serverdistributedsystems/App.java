@@ -84,7 +84,7 @@ public class App {
                     JsonNode jsonNode = objectMapper.readTree(receivedJson);
                     String action = jsonNode.get("action").asText();
 
-                    // Obtenha os dados do usuário do JSON recebido
+                    // Obtenha os dados do JSON recebido
                     JsonNode data = jsonNode.get("data");
                     String name = null;
                     String email = null;
@@ -122,26 +122,15 @@ public class App {
                     if(data.get("ponto_id") != null)
                         id = data.get("ponto_id").asInt();
 
+                    if(data.get("segmento_id") != null)
+                        id = data.get("segmento_id").asInt();
+
                     Segment segment = null;
-                    if(data.get("segmento") != null) {
-                        JsonNode segmentNode = data.get("segmento");
+                    JsonNode segmentNode = null;
+                    if(data.has("segmento")) {
+                        segmentNode = data.path("segmento");
                         segment = Segment.fromJsonString(segmentNode.toString());
                     }
-
-                    if(data.get("obs") != null)
-                        obs = data.get("obs").asText();
-
-                    if(data.get("direcao") != null)
-                        direction = data.get("direcao").asText();
-
-                    if(data.get("distancia") != null)
-                        distance = data.get("distance").asText();
-
-                    if(data.get("ponto_origem") != null)
-                        originPointId = data.get("ponto_origem").asInt();
-
-                    if(data.get("ponto_destino") != null)
-                        destinyPointId = data.get("ponto_destino").asInt();
 
                     boolean error = false;
                     String message = "";
@@ -484,7 +473,7 @@ public class App {
                                 } else {
                                     error = false;
                                     message = "Ponto editado com sucesso!";
-                                    databaseController.editPoint(databaseController.getPointById(id));
+                                    databaseController.editPoint(databaseController.getPointById(id), name, obs);
                                 }
                             } else {
                                 error = true;
@@ -600,7 +589,7 @@ public class App {
                                 } else {
                                     error = false;
                                     message = "Sucesso";
-                                    databaseController.editSegment(direction, distance, obs, originPointId, destinyPointId);
+                                    databaseController.editSegment(databaseController.getSegmentById(id), segment.getDirection(), segment.getDistance(), segment.getObs(), segment.getOriginPoint(), segment.getDestinyPoint(), id);
                                 }
                             } else {
                                 error = true;

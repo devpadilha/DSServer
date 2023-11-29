@@ -228,8 +228,6 @@ public class DatabaseController {
 
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, obs);
-
-            int rowsInserted = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -260,8 +258,16 @@ public class DatabaseController {
         return points;
     }
 
-    public void editPoint(Point point) {
+    public void editPoint(Point point, String name, String obs) {
         if (point != null) {
+            // Atualiza os valores do ponto com base nos novos valores, se fornecidos
+            if (name != null) {
+                point.setName(name);
+            }
+            if (obs != null) {
+                point.setObs(obs);
+            }
+
             StringBuilder queryBuilder = new StringBuilder("UPDATE points SET");
             List<Object> parameters = new ArrayList<>();
 
@@ -272,6 +278,11 @@ public class DatabaseController {
             if (point.getObs() != null) {
                 queryBuilder.append(" obs = ?,");
                 parameters.add(point.getObs());
+            }
+
+            if (parameters.isEmpty()) {
+                System.out.println("Nenhum campo definido para atualização");
+                return;
             }
 
             queryBuilder.deleteCharAt(queryBuilder.length() - 1);
@@ -316,40 +327,65 @@ public class DatabaseController {
             preparedStatement.setString(3, obs);
             preparedStatement.setInt(4, originPointId);
             preparedStatement.setInt(5, destinyPointId);
+
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void editSegment(String direction, String distance, String obs, int originPointId, int destinyPointId) {
+    public void editSegment(Segment segment, String direction, String distance, String obs, int originPointId, int destinyPointId, int segmentId) {
+        if (segment != null) {
+            // Atualiza os valores do ponto com base nos novos valores, se fornecidos
+            if (direction != null) {
+                segment.setDirection(direction);
+            }
+            if (distance != null) {
+                segment.setDistance(distance);
+            }
+            if (obs != null) {
+                segment.setObs(obs);
+            }
+            if (originPointId != -1) {
+                segment.setOriginPoint(originPointId);
+            }
+            if (destinyPointId != -1) {
+                segment.setDestinyPoint(destinyPointId);
+            }
+        }
+
         StringBuilder queryBuilder = new StringBuilder("UPDATE segments SET");
         List<Object> parameters = new ArrayList<>();
 
-        if (direction != null) {
+        if (segment.getDirection() != null) {
             queryBuilder.append(" direction = ?,");
-            parameters.add(direction);
+            parameters.add(segment.getDirection());
         }
-        if (distance != null) {
+        if (segment.getDistance() != null) {
             queryBuilder.append(" distance = ?,");
-            parameters.add(distance);
+            parameters.add(segment.getDistance());
         }
-        if (obs != null) {
+        if (segment.getObs() != null) {
             queryBuilder.append(" obs = ?,");
-            parameters.add(obs);
+            parameters.add(segment.getObs());
         }
-        if (originPointId != -1) {
+        if (segment.getOriginPoint() != -1) {
             queryBuilder.append(" origin_point_id = ?,");
-            parameters.add(originPointId);
+            parameters.add(segment.getOriginPoint());
         }
-        if (destinyPointId != -1) {
+        if (segment.getDestinyPoint() != -1) {
             queryBuilder.append(" destiny_point_id = ?,");
-            parameters.add(destinyPointId);
+            parameters.add(segment.getDestinyPoint());
+        }
+
+        if (parameters.isEmpty()) {
+            System.out.println("Nenhum campo definido para atualização");
+            return;
         }
 
         queryBuilder.deleteCharAt(queryBuilder.length() - 1);
-        queryBuilder.append(" WHERE origin_point_id = ? AND destiny_point_id = ?");
-        parameters.add(originPointId);
-        parameters.add(destinyPointId);
+        queryBuilder.append(" WHERE id = ?");
+        parameters.add(segmentId);
 
         String query = queryBuilder.toString();
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(query)) {
@@ -378,8 +414,9 @@ public class DatabaseController {
                 String direction = resultSet.getString("direction");
                 String distance = resultSet.getString("distance");
                 String obs = resultSet.getString("obs");
+                int id = resultSet.getInt("id");
 
-                Segment segment = new Segment(direction, distance, obs, originPointId, destinyPointId);
+                Segment segment = new Segment(direction, distance, obs, originPointId, destinyPointId, id);
                 segments.add(segment);
             }
         } catch (SQLException e) {

@@ -19,4 +19,12 @@ public class Point {
     public int getId() {
         return this.id;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setObs(String obs) {
+        this.obs = obs;
+    }
 }

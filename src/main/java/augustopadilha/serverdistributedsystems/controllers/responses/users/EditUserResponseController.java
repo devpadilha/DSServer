@@ -30,7 +30,7 @@ public class EditUserResponseController {
             pointrMap.put("email", user.getEmail());
             dataMap.put("ponto", pointrMap);
             jsonMapEdit.put("data", dataMap);
-        } else jsonMapEdit.put("data", null);
+        }
 
         // Enviar o JSON para o cliente
         PrintWriter outToClientEdit = new PrintWriter(socket.getOutputStream(), true);
