@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="400.0" styleClass="create_client_container" stylesheets="@../style/connect.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="augustopadilha.clientdistributedsystems.controllers.unlogged.ConnectController">
+   <children>
+      <Button fx:id="button_connect" layoutX="75.0" layoutY="465.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="225.0" styleClass="create_client_container" text="Conectar" />
+      <TextField fx:id="tf_port" layoutX="124.0" layoutY="230.0" styleClass="create_client_container" />
+      <Label layoutX="31.0" layoutY="230.0" prefHeight="35.0" prefWidth="134.0" text="Digite a porta" />
+   </children>
+</AnchorPane>

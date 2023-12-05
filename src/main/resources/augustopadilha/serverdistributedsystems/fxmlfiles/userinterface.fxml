@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane prefHeight="750.0" prefWidth="850.0" stylesheets="@../style/userinterface.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="augustopadilha.serverdistributedsystems.controllers.UI.UIController">
+   <children>
+      <Text layoutX="330.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title_text" text="Lista de Usuários" AnchorPane.topAnchor="15.0" />
+      <ListView fx:id="segment_list_view" layoutX="64.0" layoutY="64.0" prefHeight="650.0" prefWidth="760.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="70.0" />
+   </children>
+</AnchorPane>

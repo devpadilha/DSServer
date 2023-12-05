@@ -1,0 +1,16 @@
+.title_text {
+    -fx-font-size: 24px; /*2.5em*/
+    -fx-font-weight: bold;
+    -fx-fill: #32495CFF;
+}
+
+.list_clients_container {
+    -fx-background-color: #EEEEEE;
+}
+
+.list_clients_container VBox {
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: #000000;
+    -fx-padding: 10;
+    -fx-spacing: 15;
+}

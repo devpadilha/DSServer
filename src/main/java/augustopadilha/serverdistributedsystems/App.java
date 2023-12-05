@@ -10,11 +10,16 @@ import augustopadilha.serverdistributedsystems.controllers.system.DatabaseContro
 import augustopadilha.serverdistributedsystems.controllers.system.JWTController;
 import augustopadilha.serverdistributedsystems.controllers.system.SessionController;
 import augustopadilha.serverdistributedsystems.controllers.system.UserCredentialsController;
+import augustopadilha.serverdistributedsystems.models.ConnectionModel;
 import augustopadilha.serverdistributedsystems.models.Point;
 import augustopadilha.serverdistributedsystems.models.Segment;
+import augustopadilha.serverdistributedsystems.views.ViewFactory;
+import augustopadilha.serverdistributedsystems.controllers.system.Connection;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import augustopadilha.serverdistributedsystems.models.User;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -23,7 +28,32 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-public class App {
+public class App extends Application {
+    private static Connection connection = new Connection();
+
+    @Override
+    public void start(Stage stage) {
+        openConnectWindow();
+    }
+
+    public static void openConnectWindow() {
+        ViewFactory.getInstance().showConnectWindow();
+    }
+
+    public static ConnectionModel openConnection(String ip, String port) {
+        try {
+            return new ConnectionModel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Connection getConnection() {
+        return connection;
+    }
+
+    /*-------------------------------------------------------------------------------------------------------------------------------------------*/
     static DatabaseController databaseController = new DatabaseController();
 
     static {
@@ -32,6 +62,8 @@ public class App {
     }
 
     public static void main(String[] args) throws NumberFormatException, java.io.IOException {
+        launch();
+
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
         System.out.println("Iniciando servidor...");
@@ -124,6 +156,18 @@ public class App {
 
                     if(data.get("segmento_id") != null)
                         id = data.get("segmento_id").asInt();
+
+                    JsonNode originPointNode = null;
+                    if(data.has("ponto_origem")) {
+                        originPointNode = data.path("ponto_origem");
+                        originPointId = originPointNode.path("id").asInt();
+                    }
+
+                    JsonNode destinyPointNode = null;
+                    if(data.has("ponto_origem")) {
+                        destinyPointNode = data.path("ponto_destino");
+                        destinyPointId = originPointNode.path("id").asInt();
+                    }
 
                     Segment segment = null;
                     JsonNode segmentNode = null;
@@ -621,6 +665,15 @@ public class App {
                             // Limpe o StringBuilder para a próxima solicitação
                             jsonBuilder.setLength(0);
                             break;
+
+                        case "pedido-rotas":
+                            if(originPointId == -1 || destinyPointId == -1) {
+                                error = true;
+                                message = "Erro: Ponto de origem ou ponto de destino não encontrado";
+                            } else {
+                                error = false;
+                                message = "Sucesso";
+                            }
 
                         /*---------------------------------------------------------------------------------------------------------------------------*/
                         default:

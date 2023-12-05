@@ -13,7 +13,7 @@ public class DatabaseController {
 
     public DatabaseController() {
         try {
-            this.connection = DriverManager.getConnection("jdbc:sqlite:database.db");
+            this.connection = DriverManager.getConnection("jdbc:sqlite:database.sqlite");
         } catch (SQLException e) {
             e.printStackTrace();
         }
