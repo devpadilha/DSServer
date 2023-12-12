@@ -37,12 +37,12 @@ public class ViewFactory {
     }
 
     public void showConnectWindow() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/augustopadilha/clientdistributedsystems/fxmlfiles/unlogged/connect.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/augustopadilha/serverdistributedsystems/fxmlfiles/connect.fxml"));
         createStage(loader, "Bem vindo!");
     }
 
     public void showUsersListView() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/augustopadilha/clientdistributedsystems/fxmlfiles/admin/user/userinterface.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/augustopadilha/serverdistributedsystems/fxmlfiles/userinterface.fxml"));
         createStage(loader, "Server");
     }
 }

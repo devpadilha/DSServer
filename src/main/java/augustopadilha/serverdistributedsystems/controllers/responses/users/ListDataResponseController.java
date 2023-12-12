@@ -1,7 +1,6 @@
 package augustopadilha.serverdistributedsystems.controllers.responses.users;
 
 import augustopadilha.serverdistributedsystems.controllers.system.DatabaseController;
-import augustopadilha.serverdistributedsystems.controllers.system.SessionController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -17,7 +16,7 @@ public class ListDataResponseController {
     public static void send(String action, boolean error, String message, String token, Socket socket) throws IOException {
 
         // Obter usuário da sessão
-        User user = SessionController.getSessionUser(token);
+        User user = new User();
 
         // Criar o JSON de resposta
         Map<String, Object> jsonMapData = new HashMap<>();

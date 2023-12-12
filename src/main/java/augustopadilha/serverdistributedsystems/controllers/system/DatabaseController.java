@@ -1,12 +1,13 @@
 package augustopadilha.serverdistributedsystems.controllers.system;
-
+import java.sql.*;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import augustopadilha.serverdistributedsystems.models.Point;
 import augustopadilha.serverdistributedsystems.models.Segment;
 import augustopadilha.serverdistributedsystems.models.User;
+import augustopadilha.serverdistributedsystems.system.utilities.JWTManager;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatabaseController {
     private Connection connection;
@@ -103,7 +104,7 @@ public class DatabaseController {
     }
 
     public User getUserByToken(String token) {
-        return getUserById(JWTController.getId(token));
+        return getUserById(JWTManager.getId(token));
     }
 
     public int getIdByEmail(String token) {
@@ -460,6 +461,60 @@ public class DatabaseController {
         }
         return null;
     }
+    
+    public Segment getSegmentByOP(int originPointId) {
+        String query = "SELECT * FROM segments WHERE origin_point_id = ?";
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, String.valueOf(originPointId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String direction = resultSet.getString("direction");
+                String distance = resultSet.getString("distance");
+                String obs = resultSet.getString("obs");
+                int destinyPointId = resultSet.getInt("destiny_point_id");
+
+                return new Segment(direction, distance, obs, originPointId, destinyPointId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public Segment getSegmentByDP(int destinyPointId) {
+        String query = "SELECT * FROM segments WHERE destiny_point_id = ?";
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, String.valueOf(destinyPointId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String direction = resultSet.getString("direction");
+                String distance = resultSet.getString("distance");
+                String obs = resultSet.getString("obs");
+                int originPointId = resultSet.getInt("origin_point_id");
+
+                return new Segment(direction, distance, obs, originPointId, destinyPointId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    /*---------------------------------------------------------------------------------------------------------------------------*/
+    
+    /*---------------------------------------------------------- ROUTE ----------------------------------------------------------*/
+    /*public List<Segment> getRoute(int originPointId, int destinyPointId) {
+        List<Segment> route = new ArrayList<>();
+        if(getSegmentByOP(originPointId).getDestinyPoint() == getSegmentByDP(destinyPointId))
+        if(!getSegmentByOP(originPointId).getBlocked()) {
+            route.add(getSegmentByOP(originPointId));
+            getRoute(getSegmentByOP(originPointId).getDestinyPoint(), destinyPointId);
+        }
+        return route;
+    }*/
     /*---------------------------------------------------------------------------------------------------------------------------*/
 }
 

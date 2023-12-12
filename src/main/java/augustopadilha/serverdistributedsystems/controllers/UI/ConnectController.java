@@ -7,47 +7,40 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 
 public class ConnectController implements Initializable {
+    private App app = new App();
+    public Label server_ip_lbl;
+    public Label error_text;
     @FXML
     private Button button_connect;
-    @FXML
-    private TextField tf_ip;
     @FXML
     private TextField tf_port;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        tf_ip.setText("localhost");
         tf_port.setText("23000");
-        button_connect.setOnAction(event -> openDialog(App.openConnection(tf_ip.getText(), tf_port.getText())));
-    }
-
-    public void openDialog(ConnectionModel result) {
-        Platform.runLater(() -> {
-            try {
-                if (result != null && result.validate()) {
-                    String ip = result.getIp();
-                    String port = result.getPort();
-                    try {
-                        App.getConnection().connect(ip, port);
-
-                        ViewFactory.getInstance().closeStage((Stage) button_connect.getScene().getWindow());
-                        ViewFactory.getInstance().showUsersListView();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                else {
-                    App.openConnectWindow();
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        try {
+            server_ip_lbl.setText(InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+        button_connect.setOnAction(event -> {
+            if (tf_port.getText().isEmpty()) {
+                error_text.setText("O número da porta não pode ser vazio.");
+            }
+            else {
+                ViewFactory.getInstance().closeStage((Stage) tf_port.getScene().getWindow());
+                ViewFactory.getInstance().showUsersListView();
+                app.startServer(tf_port.getText());
             }
         });
     }
